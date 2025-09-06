@@ -6,6 +6,18 @@ project(webserver)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL ON FORCE)
 enable_language(C CXX ASM)
 
+option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+
+if(ENABLE_COVERAGE)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(STATUS "Coverage enabled")
+        add_compile_options(--coverage -O0 -g)
+        add_link_options(--coverage)
+    else()
+        message(WARNING "Coverage enabled but compiler does not support it")
+    endif()
+endif()
+
 #####################################################################
 # Build mongoose as a static library                                #
 #####################################################################
@@ -23,7 +35,7 @@ set(MONGOOSE_CDEFS
 set(MONGOOSE_CDEFS_EXTRA -DMG_TLS=MG_TLS_BUILTIN)
 
 target_compile_definitions(mongoose PRIVATE ${MONGOOSE_CDEFS} ${MONGOOSE_CDEFS_EXTRA})
-target_compile_options(mongoose PRIVATE ${MONGOOSE_CFLAGS} $<$<CONFIG:Debug>:-Og -gdwarf-2>)
+target_compile_options(mongoose PRIVATE ${MONGOOSE_CFLAGS})
 
 #####################################################################
 # Build the project                                                 #
@@ -35,7 +47,7 @@ add_subdirectory(http_server)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS} $<$<CONFIG:Debug>:-Og -gdwarf-2>)
+target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
         ${CMAKE_SOURCE_DIR}/mongoose
@@ -54,3 +66,12 @@ target_link_options(${PROJECT_NAME} PRIVATE
 #####################################################################
 # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 #     COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}>)
+
+if(ENABLE_COVERAGE)
+    add_custom_target(coverage
+        COMMAND lcov --capture --directory . --output-file coverage.info
+        COMMAND genhtml coverage.info --output-directory coverage-report
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating coverage report"
+    )
+endif()
