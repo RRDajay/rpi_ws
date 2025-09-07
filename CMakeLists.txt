@@ -20,10 +20,11 @@ set(MONGOOSE_CDEFS
     -DMG_HTTP_DIRLIST_TIME_FMT="%Y/%m/%d %H:%M:%S" -DMG_ENABLE_LINES=1 
     -DMG_ENABLE_IPV6=1 -DMG_ENABLE_SSI=1)
 
-set(MONGOOSE_CDEFS_EXTRA -DMG_TLS=MG_TLS_BUILTIN)
+set(MONGOOSE_CDEFS_EXTRA -DMG_TLS=MG_TLS_OPENSSL)
 
 target_compile_definitions(mongoose PRIVATE ${MONGOOSE_CDEFS} ${MONGOOSE_CDEFS_EXTRA})
-target_compile_options(mongoose PRIVATE ${MONGOOSE_CFLAGS} $<$<CONFIG:Debug>:-Og -gdwarf-2>)
+target_compile_options(mongoose PRIVATE ${MONGOOSE_CFLAGS} $<$<CONFIG:Debug>:-Og>)
+target_link_libraries(mongoose PRIVATE ssl crypto)
 
 #####################################################################
 # Build the project                                                 #
@@ -35,7 +36,7 @@ add_subdirectory(http_server)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS} $<$<CONFIG:Debug>:-Og -gdwarf-2>)
+target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS} $<$<CONFIG:Debug>:-Og>)
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
         ${CMAKE_SOURCE_DIR}/mongoose
