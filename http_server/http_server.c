@@ -15,6 +15,11 @@
 #include "mongoose.h"
 #include <unistd.h>
 
+#define SERVER_MAX_PATH_LEN     1024
+#define SERVER_CERT_PATH        "resource/certs/server_cert.pem"
+#define SERVER_KEY_PATH         "resource/certs/server_key.pem"
+#define CA_CERT_PATH            "resource/certs/ca_cert.pem"
+
 static const char *s_http_addr = "http://0.0.0.0:8000";   // HTTP port
 static const char *s_https_addr = "https://0.0.0.0:8443"; // HTTPS port
 static const char *s_root_dir = ".";
@@ -27,11 +32,43 @@ static void fn(struct mg_connection *c, int ev, void *ev_data)
     {
         struct mg_tls_opts opts;
         memset(&opts, 0, sizeof(opts));
+
+        char path[SERVER_MAX_PATH_LEN] = {0};
+        char s_tls_server_cert_path[SERVER_MAX_PATH_LEN] = {0};
+        char s_tls_server_key_path[SERVER_MAX_PATH_LEN] = {0};
+        char s_tls_ca_path[SERVER_MAX_PATH_LEN] = {0};
+
+        ssize_t count = readlink("/proc/self/exe", path, SERVER_MAX_PATH_LEN);
+        
+        if (count != -1) 
+        {
+            path[count] = '\0';  // Null-terminate the string
+        }
+        else
+        {
+            return;
+        }
+
+        char *last_slash = strrchr(path, '/');
+        if (last_slash != NULL) 
+        {
+            *last_slash = '\0'; // Terminate at the last '/'
+        }
+        else
+        {
+            return;
+        }
+
+
+        snprintf(s_tls_server_cert_path, SERVER_MAX_PATH_LEN, "%s/%s", path, SERVER_CERT_PATH);
+        snprintf(s_tls_server_key_path, SERVER_MAX_PATH_LEN, "%s/%s", path, SERVER_KEY_PATH);
+
 #ifdef TLS_TWOWAY
-        opts.ca = mg_file_read(&mg_fs_posix, "/home/ryanr/webserver/http_server/resource/certs/ca_cert.pem");
+        snprintf(s_tls_ca_path, SERVER_MAX_PATH_LEN, "%s/%s", path, CA_CERT_PATH);
+        opts.ca = mg_file_read(&mg_fs_posix, s_tls_ca_path);
 #endif
-        opts.cert = mg_file_read(&mg_fs_posix, "/home/ryanr/webserver/http_server/resource/certs/server_cert.pem");
-        opts.key = mg_file_read(&mg_fs_posix, "/home/ryanr/webserver/http_server/resource/certs/server_key.pem");
+        opts.cert = mg_file_read(&mg_fs_posix, s_tls_server_cert_path);
+        opts.key = mg_file_read(&mg_fs_posix, s_tls_server_key_path);
         mg_tls_init(c, &opts);
     }
 
