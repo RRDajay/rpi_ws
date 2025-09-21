@@ -33,6 +33,7 @@ set(SRC_FILES main.cpp)
 set(PROJECT_CFLAGS -W -Wall -Wextra)
 
 add_subdirectory(http_server)
+add_subdirectory(http_client)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
@@ -40,11 +41,13 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS} $<$<CONFIG:Debu
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
         ${CMAKE_SOURCE_DIR}/mongoose
-        ${CMAKE_SOURCE_DIR}/http_server)
+        ${CMAKE_SOURCE_DIR}/http_server
+        ${CMAKE_SOURCE_DIR}/http_client)
 
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE mongoose
-    PRIVATE http_server)
+    PRIVATE http_server
+    PRIVATE http_client)
 
 target_link_options(${PROJECT_NAME} PRIVATE
     -Wl,-Map=${PROJECT_NAME}.map,--cref
