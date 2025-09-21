@@ -18,7 +18,7 @@ set(MONGOOSE_CFLAGS -W -Wall -Wextra)
 # Mongoose compile definitions. See https://mongoose.ws/documentation/#build-options
 set(MONGOOSE_CDEFS 
     -DMG_HTTP_DIRLIST_TIME_FMT="%Y/%m/%d %H:%M:%S" -DMG_ENABLE_LINES=1 
-    -DMG_ENABLE_IPV6=1 -DMG_ENABLE_SSI=1)
+    -DMG_ENABLE_IPV6=1 -DMG_ENABLE_SSI=1 -DMG_ENABLE_CUSTOM_LOG=1)
 
 set(MONGOOSE_CDEFS_EXTRA -DMG_TLS=MG_TLS_OPENSSL)
 
