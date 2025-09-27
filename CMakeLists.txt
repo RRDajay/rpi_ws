@@ -24,7 +24,7 @@ set(MONGOOSE_CDEFS_EXTRA -DMG_TLS=MG_TLS_OPENSSL)
 
 target_compile_definitions(mongoose PRIVATE ${MONGOOSE_CDEFS} ${MONGOOSE_CDEFS_EXTRA})
 target_compile_options(mongoose PRIVATE ${MONGOOSE_CFLAGS} $<$<CONFIG:Debug>:-Og>)
-target_link_libraries(mongoose PRIVATE ssl crypto)
+target_link_libraries(mongoose PRIVATE ssl crypto custom_logger)
 
 #####################################################################
 # Build the project                                                 #
@@ -34,6 +34,7 @@ set(PROJECT_CFLAGS -W -Wall -Wextra)
 
 add_subdirectory(http_server)
 add_subdirectory(http_client)
+add_subdirectory(custom_logger)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
@@ -41,6 +42,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_CFLAGS} $<$<CONFIG:Debu
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
         ${CMAKE_SOURCE_DIR}/mongoose
+        ${CMAKE_SOURCE_DIR}/custom_logger
         ${CMAKE_SOURCE_DIR}/http_server
         ${CMAKE_SOURCE_DIR}/http_client)
 
